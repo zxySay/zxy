@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>图片转字符画工具</title>
+		<style type="text/css">
+			/* contnet */
+			
+			* {
+				margin: 0;
+				padding: 0;
+				font-family: monospace;
+			}
+			
+			body {
+				font-size: 12px;
+				margin: 10px;
+				font-family: simsun;
+				background: #fff;
+			}
+			
+			p {
+				height: 12px;
+			}
+			
+			p.ts {
+				margin: 10px 0 0 0;
+				width: 500px;
+				float: left;
+			}
+			
+			span {
+				width: 12px;
+			}
+			
+			#cv,
+			#txt {
+				float: left;
+			}
+			
+			#cv {
+				margin-right: 5px;
+			}
+			
+			.bt {
+				height: 37px;
+			}
+			
+			form,input {
+				width: 73px;
+				height: 27px;
+			}
+			
+			form {
+				position: relative;
+				float: left;
+				margin: 0 10px 0 0;
+			}
+			
+			#up-button {
+				position: absolute;
+				right: 0;
+				top: 0;
+				cursor: pointer;
+				opacity: 0;
+				filter: alpha(opacity=0);
+				outline: none;
+			}
+			
+			#button {}
+			
+			iframe {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<div class="bt">
+			<form id="uf">
+				<input type="file" name="file" id="up-button" />
+				<input type="button" id="button" value="选择图片" />
+			</form>
+		</div>
+
+		<canvas id="cv">fire</canvas>
+		<div id="txt"></div>
+
+		<script type="text/javascript">
+			var cv = document.getElementById("cv");
+			var c = cv.getContext("2d");
+			var txtDiv = document.getElementById("txt");
+			var fileBtn = document.getElementById("up-button");
+			var img = new Image();
+			img.src = "";
+			img.onload = function(){
+                                                init();
+                                                 }  // 图片加载完开始转换
+			fileBtn.onchange = function(){
+                                               getImg();
+                                                 }
+
+
+			// 根据灰度生成相应字符 MNHQ&OC?7>!:-;.
+			function toText(g) {
+				if(g <= 17) {
+					return 'M';
+				} else if(g > 17 && g <= 34) {
+					return 'N';
+				} else if(g > 34 && g <= 51) {
+					return 'H';
+				} else if(g > 51 && g <= 68) {
+					return 'Q';
+				} else if(g > 68 && g <= 85) {
+					return '&';
+				} else if(g > 85 && g <= 102) {
+					return 'O';
+				} else if(g > 102 && g <= 119) {
+					return 'C';
+				} else if(g > 119 && g <= 136) {
+					return '?';
+				} else if(g > 136 && g <= 153) {
+					return '7';
+				} else if(g > 153 && g <= 170) {
+					return '>';
+				} else if(g > 170 && g <= 187) {
+					return '!';
+				} else if(g > 187 && g <= 204) {
+					return ':';
+				} else if(g > 204 && g <= 221) {
+					return '-';
+				} else if(g > 221 && g <= 238) {
+					return ';';
+				} else {
+					return '.';
+				}
+			}
+
+			// 根据rgb值计算灰度
+			function getGray(r, g, b) {
+				return 0.299 * r + 0.578 * g + 0.114 * b;
+			}
+
+			// 转换
+			function init() {
+				txtDiv.style.width = img.width + "px";
+				cv.width = img.width;
+				cv.height = img.height;
+				c.drawImage(img, 0, 0);//向画布上绘制图像、画布或视频,定位图像
+				var imgData = c.getImageData(0, 0, img.width, img.height);//返回 ImageData 对象，该对象为画布上指定的矩形复制像素数据，数据以数组形式存在，存储于 ImageData 对象的 data 属性中
+				var imgDataArr = imgData.data;//data 属性返回一个对象，该对象包含指定的 ImageData 对象的图像数据
+				var imgDataWidth = imgData.width;
+				var imgDataHeight = imgData.height;
+				var specific = imgDataHeight / imgDataWidth
+				var str = "";
+				for(h = 0; h < imgDataHeight; h += 14) {
+					var p = "<p>";
+					for(w = 0; w < imgDataWidth; w += 8) {
+						var index = (w + imgDataWidth * h) * 4;
+						var r = imgDataArr[index + 0];
+						var g = imgDataArr[index + 1];
+						var b = imgDataArr[index + 2];
+						var gray = getGray(r, g, b);
+						p += toText(gray);
+					}
+					p += "</p>";
+					str += p;
+				}
+				txtDiv.innerHTML = str;
+			}
+
+			// 获取图片
+			function getImg() {
+				var reader = new FileReader();//创建FileReader对象，用于读取文件
+				reader.readAsDataURL(fileBtn.files[0]);//将文件读取为 DataURL
+				reader.onload = function() {
+				img.src = reader.result;//result属性，如果读取失败,result的值就是null, 如果读取成功,result的值就是读取的结果
+				}
+			}
+		</script>
+	</body>
+
+</html>
